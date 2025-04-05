@@ -3,7 +3,7 @@ import os
 
 bot = TelegramClient(
     'parser',
-    int(os.getenv('API_ID')),  # УДАЛИТЬ ЭТУ СТРОКУ
+    int(os.getenv('API_ID')),
     os.getenv('API_HASH')
 ).start(bot_token=os.getenv('BOT_TOKEN'))
 
@@ -19,6 +19,7 @@ async def main():
                 os.getenv('TARGET_GROUP'),
                 event.message,
                 reply_to=int(os.getenv('TOPIC_ID'))
+            )
             print(f"Переслано сообщение: {event.text[:50]}...")
 
     await bot.run_until_disconnected()
