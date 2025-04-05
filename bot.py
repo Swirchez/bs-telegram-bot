@@ -2,19 +2,27 @@ from telethon import TelegramClient, events
 import os
 
 bot = TelegramClient(
-    'bs_forwarder',
+    'parser',
     int(os.getenv('API_ID')),
     os.getenv('API_HASH')
 ).start(bot_token=os.getenv('BOT_TOKEN'))
 
-@bot.on(events.NewMessage(chats='@brawls_play'))
-async def forward_posts(event):
-    await bot.send_message(
-        '@club_2VUPYJRCG',
-        event.message,
-        reply_to=227  # ID топика
-    )
-    print("Сообщение переслано!")
+async def main():
+    # Проверяем подключение к API
+    print("Бот запущен! Мониторим канал...")
+    channel = await bot.get_entity(os.getenv('SOURCE_CHANNEL'))  # Получаем объект канала
+    print(f"Отслеживаем канал: {channel.title} (ID: {channel.id})")
 
-print("Бот запущен!")
-bot.run_until_disconnected()
+    @bot.on(events.NewMessage(chats=channel))
+    async def forward_posts(event):
+        if not event.out:  # Игнорируем исходящие сообщения
+            await bot.send_message(
+                os.getenv('TARGET_GROUP'),
+                event.message,
+                reply_to=int(os.getenv('TOPIC_ID'))
+            print(f"Переслано сообщение: {event.text[:50]}...")  # Логируем первые 50 символов
+
+    await bot.run_until_disconnected()
+
+if __name__ == '__main__':
+    bot.loop.run_until_complete(main())
