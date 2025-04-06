@@ -20,5 +20,4 @@ async def handle_new_message(event):
 
 if __name__ == '__main__':
     print("Бот запущен!")
-    print(f"Отслеживаем канал: {channel.title} (ID: {channel.id})")
     bot.run_until_disconnected()
