@@ -2,27 +2,23 @@ from telethon import TelegramClient, events
 import os
 
 bot = TelegramClient(
-    'parser',
+    'anon_forwarder',
     int(os.getenv('API_ID')),
     os.getenv('API_HASH')
 ).start(bot_token=os.getenv('BOT_TOKEN'))
 
-async def main():
-    print("Бот запущен! Мониторим канал...")
-    channel = await bot.get_entity(os.getenv('SOURCE_CHANNEL'))
-    print(f"Отслеживаем канал: {channel.title} (ID: {channel.id})")
-
-    @bot.on(events.NewMessage(chats=channel))
-    async def forward_posts(event):
-        if not event.out:
-            await bot.send_message(
-                os.getenv('TARGET_GROUP'),
-                event.message,
-                reply_to=int(os.getenv('TOPIC_ID'))
-            )
-            print(f"Переслано сообщение: {event.text[:50]}...")
-
-    await bot.run_until_disconnected()
+@bot.on(events.NewMessage(chats=os.getenv('SOURCE_CHANNEL')))
+async def handle_new_message(event):
+    await bot.send_message(
+        entity=os.getenv('TARGET_GROUP'),
+        message=event.text,
+        file=event.media,
+        formatting_entities=event.message.entities,
+        link_preview=not event.message.web_preview,
+        reply_to=int(os.getenv('TOPIC_ID'))  # Убрал silent для стандартных уведомлений
+    )
 
 if __name__ == '__main__':
-    bot.loop.run_until_complete(main())
+    print("Бот запущен!")
+    print(f"Отслеживаем канал: {channel.title} (ID: {channel.id})")
+    bot.run_until_disconnected()
